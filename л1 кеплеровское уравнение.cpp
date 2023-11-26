@@ -21,6 +21,7 @@ int main()
     double n = sqrt(mu / (a * a * a));
     for (int t = 0; t < T; ++t) {
         M = (t - 0) * n;
+        if (t == 28243) std::cout << M << "\n";
     }
     iteration_method(M, epsilon, M, e);
 }
