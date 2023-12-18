@@ -12,9 +12,12 @@ const double e = 0.656722629;
 const double mu = gravity_const * Mercury_weight;
 const double T = 2 * pi * sqrt(pow(a, 3) / mu);
 const double n = sqrt(mu / (a * a * a));
-//double calculateFunction(double M, double e, double E);
-double M(int t);
+double excentricToTrue(double E);
 double iteration_method(double M0, double E, int i);
+double radFind(double p, double teta);
+double speedRad(double p, double teta);
+double speedN(double p, double teta);
+double fullSpeed(double p, double teta);
 //void method_of_half_devision(double M0, double e, double epsilon, double pi, std::vector<double> M, int i);
 //void golden_ratio_method(double M, double e, double epsilon, double pi);
 //void newton_method(double M, double e, double epsilon);
@@ -23,26 +26,65 @@ int main()
 {
     int i = 0;
     
-    //6.28284
-    int v = iteration_method(i * n, i * n, i);
-    std::cout << "end " << v << " " << T * n + e * sin(v);
+    //iteration_method(i * n, i * n, i);
+
+    for (int j = 0; j <= 360; j++) {
+        double p = a * (1 - e * e);
+        double teta = j * pi / 180;
+        std::ofstream chart("chart.txt", std::ios::app);
+        if (chart.is_open()) {
+            chart << j*T/360  << "\t" << radFind(p, teta) << "\t" << speedRad(p, teta) << "\t" << speedN(p, teta) << "\t" << fullSpeed(p, teta) << "\n";
+        }
+        chart.close();
+    }
+
+    std::cout << "end";
     /*method_of_half_devision(M0, e, epsilon, pi, std::vector<double> M, int i);
     golden_ratio_method(M, e, epsilon, pi);
     newton_method(M, e, epsilon);*/
 }
 
-// Функция для вычисления значения функции F(E) = M + e*sin(E) - E
-//double calculateFunction(double M, double e, double E) {
-//    return M + e * sin(E) - E;
-//}
+double radFind(double p, double teta)
+{
+    return p / (1 + e * cos(teta));
+}
+
+double speedRad(double p, double teta)
+{
+    return sqrt(mu / p) * e * sin(teta);
+}
+
+double speedN(double p, double teta)
+{
+    return sqrt(mu / p) * (1 + e * cos(teta));
+}
+
+double fullSpeed(double p, double teta)
+{
+    double rad = speedRad(p, teta);
+    double n = speedN(p, teta);
+    return sqrt(rad * rad + n * n);
+}
+
+double excentricToTrue(double E)
+{
+    if (atan(sqrt((1 + e) / (1 - e)) * tan(E / 2)) * 2 > 0)
+    {
+        return atan(sqrt((1 + e) / (1 - e)) * tan(E / 2)) * 2;
+    }
+    else
+    {
+        return atan(sqrt((1 + e) / (1 - e)) * tan(E / 2)) * 2 + 2 * pi;
+    }
+}
 
 double iteration_method(double M0, double E0, int i) {
     while(i < T) {
         double E = M0 + e * sin(E0);
-        //std::cout << M0 << "\t" << E << "\n";
+        double v = excentricToTrue(E);
         std::ofstream chartE("chartE.txt", std::ios::app);
         if (chartE.is_open()) {
-            chartE << i << "\t" << M0 << "\t" << E << "\n";
+            chartE << i << "\t" << M0 << "\t" << E << "\t" << v << "\n";
         }
         chartE.close();
 
