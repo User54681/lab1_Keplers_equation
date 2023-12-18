@@ -1,39 +1,34 @@
 ﻿#include <iostream>
 #include <cmath>
 #include <vector>
+#include <fstream>
 
+const double epsilon = pow(10, -4);
+const double pi{ 3.1415926535 };
+const double Mercury_weight = 0.33 * pow(10, 24);
+const double gravity_const = 6.67430 * pow(10, -20);
+const double a = 7689.7;
+const double e = 0.656722629;
+const double mu = gravity_const * Mercury_weight;
+const double T = 2 * pi * sqrt(pow(a, 3) / mu);
+const double n = sqrt(mu / (a * a * a));
 //double calculateFunction(double M, double e, double E);
-double M(int T, int i, double n);
-double iteration_method(double M0, double epsilon, double E, double e, int T, int i, double n);
-//void method_of_half_devision(double M, double e, double epsilon, double pi);
+double M(int t);
+double iteration_method(double M0, double E, int i);
+//void method_of_half_devision(double M0, double e, double epsilon, double pi, std::vector<double> M, int i);
 //void golden_ratio_method(double M, double e, double epsilon, double pi);
 //void newton_method(double M, double e, double epsilon);
 
 int main()
 {
-    double epsilon = pow(10, -8);
-    double pi{ 3.1415926535 };
-    double Mercury_weight = 0.33 * pow(10, 24);
-    double gravity_const = 6.67430 * pow(10, -20);
-    double a = 7689.7;
-    double e = 0.656722629;
-    double M0 = 0;
-    double E0 = 0;
     int i = 0;
-    double mu = gravity_const * Mercury_weight;
-    int T = 2*pi*sqrt(pow(a, 3)/mu);
-    double n = sqrt(mu / (a * a * a));
-
-    iteration_method(M0, epsilon, E0, e, T, i, n);
-    /*method_of_half_devision(M, e, epsilon, pi);
+    
+    //6.28284
+    int v = iteration_method(i * n, i * n, i);
+    std::cout << "end " << v << " " << T * n + e * sin(v);
+    /*method_of_half_devision(M0, e, epsilon, pi, std::vector<double> M, int i);
     golden_ratio_method(M, e, epsilon, pi);
     newton_method(M, e, epsilon);*/
-}
-
-double M(int T, int i, double n) {
-    std::vector<double> M(T);
-    for (int t = 0; t < T; ++t) M[t] = t * n;
-    return M[i];
 }
 
 // Функция для вычисления значения функции F(E) = M + e*sin(E) - E
@@ -41,26 +36,34 @@ double M(int T, int i, double n) {
 //    return M + e * sin(E) - E;
 //}
 
-double iteration_method(double M0, double epsilon, double E0, double e, int T, int i, double n) {
-    double E = M0 + e * sin(E0);
-    std::cout << E << "\n";
-    if (abs(E - E0) < epsilon) {
-        return E;
-    }
-    else {
-        M0 = M(T, i, n);
-        i++;
-        return iteration_method(M0, epsilon, E, e, T, i, n);
+double iteration_method(double M0, double E0, int i) {
+    while(i < T) {
+        double E = M0 + e * sin(E0);
+        //std::cout << M0 << "\t" << E << "\n";
+        std::ofstream chartE("chartE.txt", std::ios::app);
+        if (chartE.is_open()) {
+            chartE << i << "\t" << M0 << "\t" << E << "\n";
+        }
+        chartE.close();
+
+        if (abs(E - E0) < epsilon and E != 0) {
+            return E;
+        }
+        else {
+            ++i;
+            M0 = i * n;
+            E0 = E;
+        }
     }
 }
 
-//void method_of_half_devision(double M, double e, double epsilon, double pi) {
+//void method_of_half_devision(double M0, double e, double epsilon, double pi, std::vector<double> M, int i) {
 //    double a = -3.0 * pi;
 //    double b = 2.0 * pi;
 //
 //    while (fabs(b - a) >= epsilon) {
 //        double c = (a + b) / 2.0;
-//        double functionvalue = c - e * sin(c) - M;
+//        double functionvalue = c - e * sin(c) - M0;
 //    
 //        if (functionvalue == 0.0)
 //            break;
@@ -68,6 +71,8 @@ double iteration_method(double M0, double epsilon, double E0, double e, int T, i
 //            b = c;
 //        else
 //            a = c;
+//        M0 = M[i];
+//        i++;
 //    }
 //    std::cout << (a + b) / 2.0 << "\n";
 //}
